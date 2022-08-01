@@ -46,19 +46,23 @@ app.get('/api/hello', function(req, res) {
 
 
 
-
+// www = good
+// https | http :// = must be present but bad for dns
+// slash at end = bad for dns
+// no slashes at all for dns
 app.post('/api/shorturl', (req, res) => {
-  console.log(req.body);
+  let check = req.body.url;
 
-  let check = req.body.url.match(/www\.[\w]{3,}\.[a-zA-Z]{2,}/ig)
-
-  console.log(check, typeof check)
-  if(check == null){
-    check = 'null'
+  if(/(https|http)\:\/\//.test(check)){
+    check = check.replace(/(https|http)\:\/\//, '')
   }
 
-  dns.lookup(check[0], (err, addresses, family) => {
-    if(err || /^(https|http)\:\/\/www\.[\w]{3,}\.[a-zA-Z]{2,}\/?/ig.test(req.body.url) == false){
+  if(/\/.*/.test(check)){
+    check = check.replace(/\/.*/, '')
+  }
+
+  dns.lookup(check, (err, addresses, family) => {
+    if(err){
       console.log(err);
       res.json({error: 'invalid url'});
   }else{
